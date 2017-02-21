@@ -6,17 +6,20 @@ import argparse
 import logging
 import json
 import time
+import datetime
 import schedule
 import atexit
+import random
 
 from kafka import KafkaProducer
 from kafka.errors import KafkaError, KafkaTimeoutError
-from googlefinance import getQuotes
+
 
 
 
 # Logging configuaration
-logging.basicConfig()
+logger_format = '%(asctime)-15s %(message)s'
+logging.basicConfig(format=logger_format)
 logger = logging.getLogger("data-producer")
 # - debug, info, warning, error
 logger.setLevel(logging.DEBUG)
@@ -30,9 +33,12 @@ topic = "stock-analyzer"            # default kafka topic to write to
 def fetch_price(producer, symbol):
     try:     
         logger.debug("Start to fetch price for %s" % symbol)
-        price = json.dumps(getQuotes(symbol))
-        producer.send(topic=topic, value=price, timestamp_ms=time.time())
-        logger.debug("Sent stock price for %s, the price is %s" % (symbol, price))
+        price = random.randint(30, 120)
+        timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%dT%H:%MZ')
+        payload = ('[{"StockSymbol": "AAPL", "LastTradePrice": %d, "LastTradeDateTime": "%s"}]' % (price, timestamp)).encode('utf-8')
+        
+        producer.send(topic=topic, value=payload, timestamp_ms=time.time())
+        logger.debug("Sent stock price for %s, price is %s" % (symbol, price))
 
     except KafkaTimeoutError as timeout_error:
         logger.warn("Failed to send stock price for %s to kafka, caused by: %s", (symbol, timeout_error.message))
@@ -62,7 +68,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("symbol", help="The stock symbol, such as AAPL")
     parser.add_argument("kafka_broker", help="The location of kafka broker")
-    parser.add_argument("topic", help="The kafka topic to write to, such as stock-analyzer")
+    parser.add_argument("topic", help="The kafka topic to write to")
 
     args = parser.parse_args()
     symbol = args.symbol
