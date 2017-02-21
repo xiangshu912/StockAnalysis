@@ -13,7 +13,6 @@ use google finance api to fetch a stock price as kafka producer input, send to k
 
 ### Run
 Run kafka in docker-machine(bigdata) with ip 192.168.99.100
-```
-sh
+```sh
 python data-producer.py AAPL 192.168.99.100:9092 stock-analyzer
 ```
