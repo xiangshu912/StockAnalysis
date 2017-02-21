@@ -13,7 +13,6 @@ import random
 
 from kafka import KafkaProducer
 from kafka.errors import KafkaError, KafkaTimeoutError
-from googlefinance import getQuotes
 
 
 
@@ -35,7 +34,8 @@ def fetch_price(producer, symbol):
     try:     
         logger.debug("Start to fetch price for %s" % symbol)
         price = random.randint(30, 120)
-        payload = ('[{"StockSymbol":"AAPL","LastTradePrice":%d,"LastTradeDateTime":"%s"}]' % (price, timestamp)).encode('utf-8')
+        timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%dT%H:%MZ')
+        payload = ('[{"StockSymbol": "AAPL", "LastTradePrice": %d, "LastTradeDateTime": "%s"}]' % (price, timestamp)).encode('utf-8')
         
         producer.send(topic=topic, value=payload, timestamp_ms=time.time())
         logger.debug("Sent stock price for %s, price is %s" % (symbol, price))
