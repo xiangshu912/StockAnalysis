@@ -6,7 +6,6 @@ use random number as kafka producer input, send to kafka server.
 
 ### Dependency
 >kafka-python    https://github.com/dpkp/kafka-python
-
 >schedule        https://pypi.python.org/pypi/schedule
 
 ### Run
